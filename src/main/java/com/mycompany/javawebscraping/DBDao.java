@@ -12,6 +12,7 @@ import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,33 +27,37 @@ public class DBDao {
     String databaseUrl = "jdbc:h2:~/test";
 // create a connection source to our database
     ConnectionSource connectionSource;
+    Dao<Product, Integer> productDao;
 
-    public void start(){
+    public DBDao() {
         try {
-
             Class.forName("org.h2.Driver");
             connectionSource = new JdbcConnectionSource(databaseUrl);
 
-            Dao<Product,Integer> productDao = DaoManager.createDao(connectionSource, Product.class);
+            productDao = DaoManager.createDao(connectionSource, Product.class);
             TableUtils.createTableIfNotExists(connectionSource, Product.class);
-
-            //a simple insert to the table
-//            Product p = new Product(1, databaseUrl, BigDecimal.ONE, databaseUrl);
-//            productDao.create(p);
-
-            //a sample of clearing the table
-//            TableUtils.clearTable(connectionSource, Product.class);
-
-            //a simple queryForAll rows in the table
-            List<Product> products = productDao.queryForAll();
-            System.out.println(products.toString());
         } catch (SQLException | ClassNotFoundException ex) {
             Logger.getLogger(DBDao.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    public static void main(String[] args) {
-        new DBDao().start();
+    public void insert(Product p) {
+        try {
+            //a simple insert to the table
+            productDao.create(p);
+        } catch (SQLException ex) {
+            Logger.getLogger(DBDao.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
+    public ArrayList<Product> getAllProducts() {
+        ArrayList<Product> products = null;
+        try {
+            //a simple queryForAll rows in the table
+            products = (ArrayList<Product>) productDao.queryForAll();
+        } catch (SQLException ex) {
+            Logger.getLogger(DBDao.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return products;
+    }
 }
